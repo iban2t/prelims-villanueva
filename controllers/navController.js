@@ -1,4 +1,4 @@
-const db = require('C:/node/P3 - Villanueva/database');
+const db = require('../database');
 
 // Create a new location
 exports.addLoc = async (req, res) => {

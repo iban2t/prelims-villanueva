@@ -10,7 +10,7 @@ const navRoute = require('./routes/nav');
 const zonesRoute = require('./routes/zones');
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json());  
 
 app.use('/auth', authRoute);  
 app.use('/', usersRoute);

@@ -1,4 +1,4 @@
-const db = require('C:/node/P3 - Villanueva/database');
+const db = require('../database');
 
 //Add new contact
 exports.addContact = async (req, res) => {
