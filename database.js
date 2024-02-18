@@ -1,10 +1,10 @@
 const mysql = require('mysql2');
 
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'iv4nvi11anueva;',
-    database: 'p3'
+    host: 'sql6.freemysqlhosting.net',
+    user: 'sql6684004',
+    password: 'RPi61E1X5A',
+    database: 'sql6684004'
 });
 
 db.connect((err) => {
@@ -15,4 +15,4 @@ db.connect((err) => {
     }
 });
 
-module.exports = db;
+module.exports = db; 
