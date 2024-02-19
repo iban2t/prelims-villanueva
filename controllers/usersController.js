@@ -5,7 +5,7 @@ const db = require('../database');
 exports.getUsers = async (req, res) => {
     try {
         const connection = await db.getConnection();
-        const [rows, fields] = await connection.query('SELECT id, name, role_id, num, email FROM users;');
+        const [rows, fields] = await connection.query('SELECT * FROM users;');
         connection.release(); // Release the connection back to the pool
         res.status(200).json(rows);
     } catch (error) {
@@ -24,7 +24,7 @@ exports.getUser = async (req, res) => {
 
     try {
         const connection = await db.getConnection();
-        const [rows, fields] = await connection.query('SELECT id, name, username, role_id, num, email FROM users WHERE id = ?', user_id);
+        const [rows, fields] = await connection.query('SELECT * FROM users WHERE id = ?', user_id);
         connection.release(); // Release the connection back to the pool
         if (rows.length === 0) {
             // No user found with the provided ID
