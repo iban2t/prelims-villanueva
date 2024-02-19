@@ -1,4 +1,12 @@
-const db = require('../database');
+const mysql = require('mysql2/promise');
+
+const pool = mysql.createPool({
+    host: 'sql6.freemysqlhosting.net',
+    user: 'sql6684004',
+    password: 'RPi61E1X5A',
+    database: 'sql6684004',
+    connectionLimit: 30
+});
 
 // Add new contact
 exports.addContact = async (req, res) => {
@@ -7,7 +15,7 @@ exports.addContact = async (req, res) => {
         const { name, type, num, username } = req.body;
 
         const addContactQuery = 'INSERT INTO contacts (name, type, num, user_id, username) VALUES (?, ?, ?, ?, ?)';
-        await db.execute(addContactQuery, [name, type, num, userId, username]);
+        await pool.execute(addContactQuery, [name, type, num, userId, username]);
 
         res.status(201).json({ message: 'Contact added successfully' });
     } catch (error) {
@@ -22,7 +30,7 @@ exports.getContacts = async (req, res) => {
         const userId = req.userId;
 
         const getAllContactsQuery = 'SELECT * FROM contacts WHERE user_id = ?';
-        const [contacts] = await db.execute(getAllContactsQuery, [userId]);
+        const [contacts] = await pool.execute(getAllContactsQuery, [userId]);
 
         res.json(contacts);
     } catch (error) {
@@ -38,7 +46,7 @@ exports.getContact = async (req, res) => {
         const contactId = req.params.id;
 
         const getContactQuery = 'SELECT * FROM contacts WHERE id = ? AND user_id = ?';
-        const [contact] = await db.execute(getContactQuery, [contactId, userId]);
+        const [contact] = await pool.execute(getContactQuery, [contactId, userId]);
 
         if (contact.length === 0) {
             return res.status(404).json({ error: 'Contact not found' });
@@ -59,7 +67,7 @@ exports.updateContact = async (req, res) => {
         const { name, type, num, username } = req.body;
 
         const updateContactQuery = 'UPDATE contacts SET name = ?, type = ?, num = ?, username = ? WHERE id = ? AND user_id = ?';
-        const [result] = await db.execute(updateContactQuery, [name, type, num, username, contactId, userId]);
+        const [result] = await pool.execute(updateContactQuery, [name, type, num, username, contactId, userId]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Contact not found or unauthorized' });
@@ -79,7 +87,7 @@ exports.deleteContact = async (req, res) => {
         const contactId = req.params.id;
 
         const deleteContactQuery = 'DELETE FROM contacts WHERE id = ? AND user_id = ?';
-        const [result] = await db.execute(deleteContactQuery, [contactId, userId]);
+        const [result] = await pool.execute(deleteContactQuery, [contactId, userId]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Contact not found or unauthorized' });
