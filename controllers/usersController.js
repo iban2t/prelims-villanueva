@@ -1,109 +1,90 @@
+const bcrypt = require('bcrypt');
 const db = require('../database');
 
-//Get all users
+// Get all users
 exports.getUsers = async (req, res) => {
     try {
-
-    // db.query('SELECT u.id, u.name, u.username, u.role_id, r.role_name, num, email FROM users u JOIN roles r ON u.role_id = r.id;', (err,result) => {
-        db.query('SELECT id, name, role_id, num, email FROM users;', (err,result) => {
-      if (err) {
-        console.error('Error fetching items:', err);
-        res.status(500).json({ message: 'Internal Server Error '});
-      } else {
-        res.status(200).json(result);
-      }
-    });
-
-  } catch (error) {
-    
-    console.error('Error loading user:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+        const connection = await db.getConnection();
+        const [rows, fields] = await connection.query('SELECT id, name, role_id, num, email FROM users;');
+        connection.release(); // Release the connection back to the pool
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Error loading user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
 
-//Get single user
+// Get single user
 exports.getUser = async (req, res) => {
-  let user_id = req.params.id;
+    const user_id = req.params.id;
 
-  if (!user_id) {
-      return res.status(400).send({ error: true, message: 'Please provide user_id' });
-  }
+    if (!user_id) {
+        return res.status(400).json({ error: true, message: 'Please provide user_id' });
+    }
 
-  try {
-      db.query('SELECT u.id, u.name, u.username, u.role_id, r.role_name, num, email FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = ?', user_id, (err, result) => {
-          if (err) {
-              console.error('Error fetching items:', err);
-              res.status(500).json({ message: 'Internal Server Error' });
-          } else {
-              if (result.length === 0) {
-                  // No user found with the provided ID
-                  return res.status(404).json({ error: true, message: 'Account does not exist' });
-              }
-              res.status(200).json(result);
-          }
-      });
-  } catch (error) {
-      console.error('Error loading user:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-  }
+    try {
+        const connection = await db.getConnection();
+        const [rows, fields] = await connection.query('SELECT id, name, username, role_id, num, email FROM users WHERE id = ?', user_id);
+        connection.release(); // Release the connection back to the pool
+        if (rows.length === 0) {
+            // No user found with the provided ID
+            return res.status(404).json({ error: true, message: 'Account does not exist' });
+        }
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error('Error loading user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
 
-//Update User
+// Update User
 exports.updateUser = async (req, res) => {
-  try {
-      const user_id = req.params.id;
-      const { name, username, password, role_id, num, email } = req.body;
-      const hashedPassword = await bcrypt.hash(password, 10);
+    const user_id = req.params.id;
+    const { name, username, password, role_id, num, email } = req.body;
 
-      if (!user_id || !name || !username || !password || !role_id) {
-          return res.status(400).json({ error: 'Invalid input', message: 'Please provide name, username, password, role_id, num, and email' });
-      }
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-      const updateQuery = 'UPDATE users SET name = ?, username = ?, password = ?, role_id = ?, num = ?, email = ? WHERE id = ?';
-      db.query(updateQuery, [name, username, hashedPassword, role_id, num, email, user_id], (err, result, fields) => {
-          if (err) {
-              console.error(`Error updating user ${user_id}:`, err);
-              return res.status(500).json({ message: 'Internal Server Error' });
-          } else {
-              if (result.affectedRows === 0) {
-                  // No user found with the provided ID
-                  return res.status(404).json({ error: true, message: 'Account does not exist' });
-              }
-              return res.status(200).json(result);
-          }
-      });
-  } catch (error) {
-      console.error('Error updating user:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-  }
+        if (!user_id || !name || !username || !password || !role_id) {
+            return res.status(400).json({ error: 'Invalid input', message: 'Please provide name, username, password, role_id, num, and email' });
+        }
+
+        const connection = await db.getConnection();
+        const [result, fields] = await connection.query('UPDATE users SET name = ?, username = ?, password = ?, role_id = ?, num = ?, email = ? WHERE id = ?',
+            [name, username, hashedPassword, role_id, num, email, user_id]);
+        connection.release(); // Release the connection back to the pool
+        if (result.affectedRows === 0) {
+            // No user found with the provided ID
+            return res.status(404).json({ error: true, message: 'Account does not exist' });
+        }
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
 
-//Delete User
+// Delete User
 exports.deleteUser = async (req, res) => {
-  try {
-      const user_id = req.params.id;
+    const user_id = req.params.id;
 
-      if (!user_id) {
-          return res.status(400).json({ error: true, message: 'Please provide user_id' });
-      }
+    if (!user_id) {
+        return res.status(400).json({ error: true, message: 'Please provide user_id' });
+    }
 
-      const deleteQuery = 'DELETE FROM users WHERE id = ?';
-      db.query(deleteQuery, user_id, (err, result, fields) => {
-          if (err) {
-              console.error('Error deleting user:', err);
-              res.status(500).json({ message: 'Internal Server Error' });
-          } else {
-              if (result.affectedRows > 0) {
-                  // Check if any rows were affected (indicating successful deletion)
-                  res.status(200).json({ message: 'User deleted successfully' });
-              } else {
-                  // No rows affected means user with specified ID was not found
-                  res.status(404).json({ error: true, message: 'User not found' });
-              }
-          }
-      });
-  } catch (error) {
-      console.error('Error deleting user:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-  }
+    try {
+        const connection = await db.getConnection();
+        const [result, fields] = await connection.query('DELETE FROM users WHERE id = ?', user_id);
+        connection.release(); // Release the connection back to the pool
+        if (result.affectedRows > 0) {
+            // Check if any rows were affected (indicating successful deletion)
+            res.status(200).json({ message: 'User deleted successfully' });
+        } else {
+            // No rows affected means user with specified ID was not found
+            res.status(404).json({ error: true, message: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
