@@ -3,6 +3,7 @@ const db = require('../database');
 // Add new role
 exports.addRole = async (req, res) => {
     try {
+        const connection = await db.getConnection();
         const { role_code, role_name } = req.body;
 
         // Require input across all fields
@@ -11,7 +12,8 @@ exports.addRole = async (req, res) => {
         }
 
         const insertRoleQuery = 'INSERT INTO roles (role_code, role_name) VALUES (?, ?)';
-        await db.promise().execute(insertRoleQuery, [role_code, role_name]);
+        await connection.execute(insertRoleQuery, [role_code, role_name]);
+        connection.release();
 
         res.status(201).json({ message: 'Role added successfully!' });
     } catch (error) {
@@ -29,7 +31,9 @@ exports.addRole = async (req, res) => {
 // Get all roles
 exports.getRoles = async (req, res) => {
     try {
-        const [roles] = await db.promise().query('SELECT * FROM roles');
+        const connection = await db.getConnection();
+        const [roles] = await connection.query('SELECT * FROM roles');
+        connection.release();
         res.status(200).json(roles);
     } catch (error) {
         console.error('Error fetching roles:', error);
@@ -47,7 +51,9 @@ exports.getRole = async (req, res) => {
     }
 
     try {
-        const [role] = await db.promise().query('SELECT * FROM roles WHERE id = ?', role_id);
+        const connection = await db.getConnection();
+        const [role] = await connection.query('SELECT * FROM roles WHERE id = ?', role_id);
+        connection.release();
 
         if (role.length === 0) {
             return res.status(404).json({ error: true, message: 'Role does not exist' });
@@ -69,8 +75,10 @@ exports.updateRole = async (req, res) => {
             return res.status(400).json({ error: 'Invalid input', message: 'Please provide role code and role name' });
         }
 
+        const connection = await db.getConnection();
         const updateQuery = 'UPDATE roles SET role_code = ?, role_name = ? WHERE id = ?';
-        const [result] = await db.promise().execute(updateQuery, [role_code, role_name, role_id]);
+        const [result] = await connection.execute(updateQuery, [role_code, role_name, role_id]);
+        connection.release();
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: true, message: 'Role does not exist' });
@@ -91,8 +99,10 @@ exports.deleteRole = async (req, res) => {
             return res.status(400).json({ error: true, message: 'Please provide role_id' });
         }
 
+        const connection = await db.getConnection();
         const deleteQuery = 'DELETE FROM roles WHERE id = ?';
-        const [result] = await db.promise().execute(deleteQuery, role_id);
+        const [result] = await connection.execute(deleteQuery, role_id);
+        connection.release();
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: true, message: 'Role not found' });
