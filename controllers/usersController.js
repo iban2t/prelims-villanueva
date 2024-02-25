@@ -4,9 +4,9 @@ const db = require('../database');
 // Get all users
 exports.getUsers = async (req, res) => {
     try {
-        const connection = await db.getConnection();
-        const [rows, fields] = await connection.query('SELECT * FROM users;');
-        connection.release(); // Release the connection back to the pool
+        // const connection = await db.getConnection();
+        const [rows, fields] = await connection.query('SELECT id, name, username, role_id, num, email, address FROM users;');
+        // connection.release();
         res.status(200).json(rows);
     } catch (error) {
         console.error('Error loading user:', error);
@@ -23,9 +23,9 @@ exports.getUser = async (req, res) => {
     }
 
     try {
-        const connection = await db.getConnection();
-        const [rows, fields] = await connection.query('SELECT * FROM users WHERE id = ?', user_id);
-        connection.release(); // Release the connection back to the pool
+        // const connection = await db.getConnection();
+        const [rows, fields] = await connection.query('SELECT id, name, username, role_id, num, email, address FROM users WHERE id = ?;', user_id);
+        // connection.release();
         if (rows.length === 0) {
             // No user found with the provided ID
             return res.status(404).json({ error: true, message: 'Account does not exist' });
