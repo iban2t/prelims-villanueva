@@ -4,9 +4,7 @@ const db = require('../database');
 // Get all users
 exports.getUsers = async (req, res) => {
     try {
-        // const connection = await db.getConnection();
-        const [rows, fields] = await connection.query('SELECT id, name, username, role_id, num, email, address FROM users;');
-        // connection.release();
+        const [rows, fields] = await db.execute('SELECT id, name, username, role_id, num, email, address FROM users;');
         res.status(200).json(rows);
     } catch (error) {
         console.error('Error loading user:', error);
@@ -23,11 +21,8 @@ exports.getUser = async (req, res) => {
     }
 
     try {
-        // const connection = await db.getConnection();
-        const [rows, fields] = await connection.query('SELECT id, name, username, role_id, num, email, address FROM users WHERE id = ?;', user_id);
-        // connection.release();
+        const [rows, fields] = await db.execute('SELECT id, name, username, role_id, num, email, address FROM users WHERE id = ?;', user_id);
         if (rows.length === 0) {
-            // No user found with the provided ID
             return res.status(404).json({ error: true, message: 'Account does not exist' });
         }
         res.status(200).json(rows);
@@ -49,10 +44,8 @@ exports.updateUser = async (req, res) => {
             return res.status(400).json({ error: 'Invalid input', message: 'Please provide name, username, password, role_id, num, and email' });
         }
 
-        const connection = await db.getConnection();
-        const [result, fields] = await connection.query('UPDATE users SET name = ?, username = ?, password = ?, role_id = ?, num = ?, email = ? WHERE id = ?',
+        const [result, fields] = await db.execute('UPDATE users SET name = ?, username = ?, password = ?, role_id = ?, num = ?, email = ? WHERE id = ?',
             [name, username, hashedPassword, role_id, num, email, user_id]);
-        connection.release(); // Release the connection back to the pool
         if (result.affectedRows === 0) {
             // No user found with the provided ID
             return res.status(404).json({ error: true, message: 'Account does not exist' });
@@ -73,9 +66,7 @@ exports.deleteUser = async (req, res) => {
     }
 
     try {
-        const connection = await db.getConnection();
-        const [result, fields] = await connection.query('DELETE FROM users WHERE id = ?', user_id);
-        connection.release(); // Release the connection back to the pool
+        const [result, fields] = await db.execute('DELETE FROM users WHERE id = ?', user_id);
         if (result.affectedRows > 0) {
             // Check if any rows were affected (indicating successful deletion)
             res.status(200).json({ message: 'User deleted successfully' });
