@@ -2,10 +2,8 @@ const db = require('../database');
 const bcrypt = require('bcrypt');
 
 //Get all users
-exports.getUsers = async (res) => {
+exports.getUsers = async (req, res) => {
     try {
-    // consoleres.status(200).json({ message: 'titi' });
-    console.log("fdsff")
     db.query('SELECT u.id, u.name, u.username, u.role_id, r.role_name, num, email FROM users u JOIN roles r ON u.role_id = r.id;', (err,result) => {
       if (err) {
         console.error('Error fetching items:', err);
