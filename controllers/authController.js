@@ -44,7 +44,7 @@ exports.loginUser = async (req, res) => {
 
         try {
             const getUserQuery = 'SELECT * FROM users WHERE username = ?';
-            const [rows] = await db.query(getUserQuery, [username]);
+            const [rows] = await db.promise().execute(getUserQuery, [username]);
 
             if (rows.length === 0) {
                 return res.status(401).json({ error: 'Invalid username or password' });
