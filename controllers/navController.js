@@ -6,12 +6,12 @@ exports.addLocation = async (req, res) => {
         const userId = req.userId;
         const { name, latitude, longitude } = req.body;
 
-      //   if (!name || !latitude || !longitude) {
-      //     return res.status(400).json({ error: 'Invalid input', message: 'Please provide name, latitude, and longitude' });
-      // }
+        if (!name || !latitude || !longitude) {
+          return res.status(400).json({ error: 'Invalid input', message: 'Please provide name, latitude, and longitude' });
+      }
 
         const createLocationQuery = 'INSERT INTO location (name, user_id, coordinates) VALUES (?, ?, POINT(?, ?))';
-        await db.execute(createLocationQuery, [name, userId, latitude, longitude]);
+        await db.promise().execute(createLocationQuery, [name, userId, latitude, longitude]);
         
         res.status(201).json({ message: 'Location created successfully' });
     } catch (error) {
@@ -26,7 +26,7 @@ exports.getAllLocations = async (req, res) => {
     try {
         const userId = req.userId;
         const getAllLocationsQuery = 'SELECT * FROM location WHERE user_id = ?';
-        const [locations] = await db.execute(getAllLocationsQuery, [userId]);
+        const [locations] = await db.promise().execute(getAllLocationsQuery, [userId]);
 
         res.json(locations);
     } catch (error) {

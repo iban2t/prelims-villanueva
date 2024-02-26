@@ -17,10 +17,10 @@ router.get('/roles', authenticateToken, rolesController.getRoles);
 router.get('/roles/:id', authenticateToken, rolesController.getRole);
 
 //Update Role Route
-router.put('/roles/:id', authenticateToken, rolesController.updateRole);
+router.put('/update/:id', authenticateToken, rolesController.updateRole);
 
 // Delete Role Route
-router.delete('/roles/:id', authenticateToken, rolesController.deleteRole);
+router.delete('/:id', authenticateToken, rolesController.deleteRole);
 
 //Users Table
 //All Users Route

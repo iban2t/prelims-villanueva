@@ -9,8 +9,8 @@ const checkAndCreateZones = async () => {
       const [locationIds] = await db.promise().query(locationIdsQuery);
   
       // Thresholds for distress signals and reports
-      const distressThreshold = 2; // Example threshold for distress signals
-      const reportThreshold = 2; // Example threshold for reports
+      const distressThreshold = 2; //threshold for distress signals
+      const reportThreshold = 2; //threshold for reports
       
       // Iterate over each location
       for (const { loc_id } of locationIds) {
