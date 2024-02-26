@@ -2,7 +2,7 @@ const db = require('../database');
 const bcrypt = require('bcrypt');
 
 //Get all users
-exports.getUsers = async (req, res) => {
+exports.getUsers = async (res) => {
     try {
     consoleres.status(200).json({ message: 'titi' });
     db.query('SELECT u.id, u.name, u.username, u.role_id, r.role_name, num, email FROM users u JOIN roles r ON u.role_id = r.id;', (err,result) => {
