@@ -7,7 +7,7 @@ exports.addFreq = async (req, res) => {
       const userId = req.userId; 
   
       const addFreqLocationQuery = 'INSERT INTO freqLocation (category, name, address, user_id, loc_id) VALUES (?, ?, ?, ?, ?)';
-      await db.execute(addFreqLocationQuery, [category, name, address, userId, loc_id]);
+      await db.promise().execute(addFreqLocationQuery, [category, name, address, userId, loc_id]);
   
       res.status(201).json({ message: 'FreqLocation added successfully' });
     } catch (error) {
@@ -22,7 +22,7 @@ exports.allFreq = async (req, res) => {
       const userId = req.userId;
   
       const getAllFreqLocationsQuery = 'SELECT * FROM freqLocation WHERE user_id = ?';
-      const [freqLocations] = await db.execute(getAllFreqLocationsQuery, [userId]);
+      const [freqLocations] = await db.promise().execute(getAllFreqLocationsQuery, [userId]);
   
       res.json(freqLocations);
     } catch (error) {
@@ -59,7 +59,7 @@ exports.updateFreq = async (req, res) => {
       const freqLocationId = req.params.id;
   
       const updateFreqLocationQuery = 'UPDATE freqLocation SET category = ?, name = ?, address = ?, loc_id = ? WHERE id = ? AND user_id = ?';
-      const [result] = await db.execute(updateFreqLocationQuery, [category, name, address, loc_id, freqLocationId, userId]);
+      const [result] = await db.promise().execute(updateFreqLocationQuery, [category, name, address, loc_id, freqLocationId, userId]);
   
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: 'FreqLocation not found or unauthorized' });
@@ -79,7 +79,7 @@ exports.deleteFreq = async (req, res) => {
       const freqLocationId = req.params.id;
   
       const deleteFreqLocationQuery = 'DELETE FROM freqLocation WHERE id = ? AND user_id = ?';
-      const [result] = await db.execute(deleteFreqLocationQuery, [freqLocationId, userId]);
+      const [result] = await db.promise().execute(deleteFreqLocationQuery, [freqLocationId, userId]);
   
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: 'FreqLocation not found or unauthorized' });
