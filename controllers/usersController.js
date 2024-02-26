@@ -11,6 +11,7 @@ exports.getUsers = async (res) => {
         console.error('Error fetching items:', err);
         res.status(500).json({ message: 'Internal Server Error '});
       } else {
+        console.log(res)
         res.status(200).json(result);
       }
     });
